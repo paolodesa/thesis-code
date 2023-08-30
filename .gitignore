@@ -1,5 +1,6 @@
 # Outputs
 *.csv
+*.epw
 !stations.csv
 !epw_compiler/header_compiler/ashrae_wmo_db.csv
 
