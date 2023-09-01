@@ -22,7 +22,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--filename", help="Filename of the list of weather station IDs as a comma separated list", required=True)
     parser.add_argument("-s", "--start_year", help="Start year of the scraping (e.g. 2023)", required=True)
-    parser.add_argument("-e", "--end_year", help="End year of the scraping (e.g. 2023)", required=True)
+    parser.add_argument("-e", "--end_year", help="End year of the scraping (included)", required=True)
     args = parser.parse_args()
     return args.filename, args.start_year, args.end_year
 
@@ -55,7 +55,12 @@ def scrape_and_upload(station_id, start_year, end_year):
             df = pd.concat([df, pd.json_normalize(res, record_path=['observations'])], ignore_index=True)
             time.sleep(2)
 
-    df['timestamp'] = pd.to_datetime(df['obsTimeUtc'])
+    try:
+        df['timestamp'] = pd.to_datetime(df['obsTimeUtc'])
+    except KeyError:
+        print(f"{station_id} has no data in the specified date interaval")
+        return
+    
     df.set_index('timestamp', inplace=True)
 
     dataPointsTemp = [

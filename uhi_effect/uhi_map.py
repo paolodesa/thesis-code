@@ -21,16 +21,15 @@ parser.add_argument("--start_ts", help="Start timestamp (e.g. 2023-01-01T00:00:0
 parser.add_argument("--end_ts", help="End timestamp (e.g. 2023-01-31T23:59:59Z)", required=True)
 args = parser.parse_args()
 
-start_ts, end_ts = args.start_ts, args.start_ts
+start_ts, end_ts = args.start_ts, args.end_ts
 
 client = InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG)
 query_api = client.query_api()
 
-query = 'from(bucket:"WeatherUnderground")\
-    |> range(start: 2021-01-01T00:00:00Z, stop: 2021-07-01T00:00:00Z)\
+query = f'from(bucket:"WeatherUnderground")\
+    |> range(start: {start_ts}, stop: {end_ts})\
     |> filter(fn: (r) => r["_field"] == "T_db[C]")\
     |> aggregateWindow(every: 1d, fn: mean, createEmpty: false)\
-    |> fill(usePrevious: true)\
     |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
 
 df = query_api.query_data_frame(query)
