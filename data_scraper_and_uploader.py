@@ -51,8 +51,11 @@ def scrape_and_upload(station_id, start_year, end_year):
                 d = 30
             elif m == '02':
                 d = 28
-            res = requests.get(f'https://api.weather.com/v2/pws/history/hourly?stationId={station_id}&format=json&units=m&startDate={y}{m}01&endDate={y}{m}{d}&numericPrecision=decimal&apiKey=e1f10a1e78da46f5b10a1e78da96f525').json()
-            df = pd.concat([df, pd.json_normalize(res, record_path=['observations'])], ignore_index=True)
+            try:
+                res = requests.get(f'https://api.weather.com/v2/pws/history/hourly?stationId={station_id}&format=json&units=m&startDate={y}{m}01&endDate={y}{m}{d}&numericPrecision=decimal&apiKey=e1f10a1e78da46f5b10a1e78da96f525').json()
+                df = pd.concat([df, pd.json_normalize(res, record_path=['observations'])], ignore_index=True)
+            except requests.exceptions.JSONDecodeError:
+                pass
             time.sleep(2)
 
     try:
