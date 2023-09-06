@@ -15,6 +15,7 @@ load_dotenv()
 INFLUXDB_ORG = os.getenv('INFLUXDB_ORG')
 INFLUXDB_TOKEN = os.getenv('INFLUXDB_TOKEN')
 INFLUXDB_URL = os.getenv('INFLUXDB_URL')
+MAPBOX_TOKEN = os.getenv('MAPBOX_TOKEN')
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--start_ts", help="Start timestamp (e.g. 2023-01-01T00:00:00Z)", required=True)
@@ -41,8 +42,7 @@ df.sort_index(inplace=True)
 df.drop(columns=['result', 'table', '_start', '_stop', '_time', 'coords'], inplace=True)
 
 
-px.set_mapbox_access_token("xxxxxxxx")
-mapbox_access_token = "xxxxxxxx"
+px.set_mapbox_access_token(MAPBOX_TOKEN)
 
 app = Dash(__name__)
 
