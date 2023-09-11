@@ -13,6 +13,8 @@ load_dotenv()
 INFLUXDB_ORG = os.getenv('INFLUXDB_ORG')
 INFLUXDB_TOKEN = os.getenv('INFLUXDB_TOKEN')
 INFLUXDB_URL = os.getenv('INFLUXDB_URL')
+WEATHER_UNDERGROUND_BUCKET_NAME = os.getenv('WEATHER_UNDERGROUND_BUCKET_NAME')
+OPEN_METEO_BUCKET_NAME = os.getenv('OPEN_METEO_BUCKET_NAME')
 
 client = InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG)
 writer = client.write_api(write_options=SYNCHRONOUS)
@@ -117,7 +119,7 @@ def scrape_and_upload(station_id, start_year, end_year):
         dataPointsRad = []
     
     dataPoints = dataPointsTemp + dataPointsHum + dataPointsWindSpeed + dataPointsWindDir + dataPointsDewpt + dataPointsPressureMin + dataPointsPressureMax + dataPointsRain + dataPointsPrecRate + dataPointsRad
-    writer.write(bucket="WeatherUnderground", org=INFLUXDB_ORG, record=dataPoints)
+    writer.write(bucket=WEATHER_UNDERGROUND_BUCKET_NAME, org=INFLUXDB_ORG, record=dataPoints)
 
     scrape_om_and_upload(station_id, df['lat'].max(), df['lon'].max(), start_year, end_year)
 
@@ -166,7 +168,7 @@ def scrape_om_and_upload(station_id, lat, lon, start_year, end_year):
             for time, lat, lon, temp in zip(df.index, df['lat'], df['lon'], df['diffuse_radiation (W/m²)'])
     ]
     dataPoints = dataPointsTemp + dataPointsHum + dataPointsWindSpeed + dataPointsWindDir + dataPointsDewpt + dataPointsPressure + dataPointsRain + dataPointsWeatherCode + dataPointsRad
-    writer.write(bucket="OpenMeteo", org=INFLUXDB_ORG, record=dataPoints)
+    writer.write(bucket=OPEN_METEO_BUCKET_NAME, org=INFLUXDB_ORG, record=dataPoints)
 
 
 if __name__ == "__main__":

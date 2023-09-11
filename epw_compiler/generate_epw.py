@@ -15,6 +15,7 @@ load_dotenv()
 INFLUXDB_ORG = os.getenv('INFLUXDB_ORG')
 INFLUXDB_TOKEN = os.getenv('INFLUXDB_TOKEN')
 INFLUXDB_URL = os.getenv('INFLUXDB_URL')
+WEATHER_UNDERGROUND_BUCKET_NAME = os.getenv('WEATHER_UNDERGROUND_BUCKET_NAME')
 
 client = InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG)
 query_api = client.query_api()
@@ -201,7 +202,7 @@ def parse_args():
 if __name__ == "__main__":
     station_id, year, city, country, state, source, leap, dst_start_date, dst_end_date, start_weekday, comment1, comment2 = parse_args()
 
-    query = f'from(bucket:"WeatherUnderground")\
+    query = f'from(bucket:"{WEATHER_UNDERGROUND_BUCKET_NAME}")\
         |> range(start: {year-1}-12-31T23:59:00Z, stop: {year}-12-31T23:59:59Z)\
         |> filter(fn: (r) => r["_measurement"] == "{station_id}")\
         |> aggregateWindow(every: 1h, fn: mean, createEmpty: false)\

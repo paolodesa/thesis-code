@@ -5,8 +5,7 @@ This project uses data scraping to collect weather data from [Weather Undergroun
 ## Requirements
 
 First of all, all the tools have been written in **Python** (version 3.9 was used during development). Therfore, users need to have it installed on their systems in order to run the code. Additionally, as mentined before, this project stores the scraped data in InfluxDB, thus users will need to setup a [self-hosted](https://docs.influxdata.com/influxdb/v2.7/install/) instance or use a [cloud-hosted](https://www.influxdata.com/products/influxdb-cloud/serverless/) one, provided by InfluxData.\
-In oder to installed the required Python packages it is suggested to create a virtual environment and run `pip install -r requirements.txt` in the project root.\
-**Before running any code**, two buckets called `WeatherUnderground` and `OpenMeteo` must be created inside InfluxDB (the names can be changed, alongside all their references in the code).
+In oder to installed the required Python packages it is suggested to create a virtual environment and run `pip install -r requirements.txt` in the project root.
 
 ### Environment variables
 
@@ -15,6 +14,8 @@ The file `.env.example` shows an example of the `.env` file where users will nee
 - **INFLUXDB_TOKEN**: the API token required to interact with the database
 - **INFLUXDB_URL**: the full URL of the InfluxDB instance
 - **MAPBOX_TOKEN**: the public API token required to load the map from Mapbox (it can be obtained with a free account)
+- **WEATHER_UNDERGROUND_BUCKET_NAME**: the (unique) name of the InfluxDB bucket where Weather Underground's data will be stored (it is suggested to create 1 bucket per city/area)
+- **OPEN_METEO_BUCKET_NAME**: the (unique) name of the InfluxDB bucket where Open Meteo's data will be stored (it is suggested to create 1 bucket per city/area)
 
 ## How to use the tools
 
@@ -76,7 +77,7 @@ Moreover, users can obtain plots of the temperture gap between the urban area an
 - `--start_year`: the start year of the data used for the analysis
 - `--end_year`: the end year of the data used for the analysis (included)
 
-**NOTE**: both scripts will use all weather station present in the InfluxDB database's `WeatherUnderground` bucket; therfore, the bucket should be emptied before conducting a new uhi effect analysis on a different city
+**NOTE**: both scripts will use all weather stations present in the InfluxDB's bucket whose name is specified by the `WEATHER_UNDERGROUND_BUCKET_NAME` environment variable; therfore, it was suggested to create 1 bucket per city/area during the setup phase
 
 ### EAHX and PDEC cooling systems assessment
 

@@ -17,6 +17,7 @@ load_dotenv()
 INFLUXDB_ORG = os.getenv('INFLUXDB_ORG')
 INFLUXDB_TOKEN = os.getenv('INFLUXDB_TOKEN')
 INFLUXDB_URL = os.getenv('INFLUXDB_URL')
+WEATHER_UNDERGROUND_BUCKET_NAME = os.getenv('WEATHER_UNDERGROUND_BUCKET_NAME')
 
 client = InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG)
 query_api = client.query_api()
@@ -43,7 +44,7 @@ final_hour = f"{(int(final_datapoint.hour)-1):02d}"
 start_ts = f"{init_datapoint.year}-{init_month}-{init_day}T{init_hour}:00:00Z"
 end_ts = f"{final_datapoint.year}-{final_month}-{final_day}T{final_hour}:00:00Z"
 
-query = f'from(bucket:"WeatherUnderground")\
+query = f'from(bucket:"{WEATHER_UNDERGROUND_BUCKET_NAME}")\
     |> range(start: {start_ts}, stop: {end_ts})\
     |> filter(fn: (r) => r["_measurement"] == "{station_id}")\
     |> aggregateWindow(every: 1h, fn: mean, createEmpty: false)\

@@ -16,6 +16,7 @@ INFLUXDB_ORG = os.getenv('INFLUXDB_ORG')
 INFLUXDB_TOKEN = os.getenv('INFLUXDB_TOKEN')
 INFLUXDB_URL = os.getenv('INFLUXDB_URL')
 MAPBOX_TOKEN = os.getenv('MAPBOX_TOKEN')
+WEATHER_UNDERGROUND_BUCKET_NAME = os.getenv('WEATHER_UNDERGROUND_BUCKET_NAME')
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--start_ts", help="Start timestamp (e.g. 2023-01-01T00:00:00Z)", required=True)
@@ -27,7 +28,7 @@ start_ts, end_ts = args.start_ts, args.end_ts
 client = InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG)
 query_api = client.query_api()
 
-query = f'from(bucket:"WeatherUnderground")\
+query = f'from(bucket:"{WEATHER_UNDERGROUND_BUCKET_NAME}")\
     |> range(start: {start_ts}, stop: {end_ts})\
     |> filter(fn: (r) => r["_field"] == "T_db[C]")\
     |> aggregateWindow(every: 1d, fn: mean, createEmpty: false)\

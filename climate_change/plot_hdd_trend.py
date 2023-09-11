@@ -11,6 +11,8 @@ load_dotenv()
 INFLUXDB_ORG = os.getenv('INFLUXDB_ORG')
 INFLUXDB_TOKEN = os.getenv('INFLUXDB_TOKEN')
 INFLUXDB_URL = os.getenv('INFLUXDB_URL')
+WEATHER_UNDERGROUND_BUCKET_NAME = os.getenv('WEATHER_UNDERGROUND_BUCKET_NAME')
+OPEN_METEO_BUCKET_NAME = os.getenv('OPEN_METEO_BUCKET_NAME')
 
 client = InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG)
 query_api = client.query_api()
@@ -40,7 +42,7 @@ def hdd(df):
     return sum_dist
 
 
-for source in ['WeatherUnderground', 'OpenMeteo']:
+for source in [WEATHER_UNDERGROUND_BUCKET_NAME, OPEN_METEO_BUCKET_NAME]:
     query = f'from(bucket:"{source}")\
                 |> range(start: {start_year-1}-12-31T23:59:00Z, stop: {end_year}-12-31T23:59:59Z)\
                 |> filter(fn: (r) => r["_measurement"] == "{station_id}")\

@@ -13,6 +13,7 @@ load_dotenv()
 INFLUXDB_ORG = os.getenv('INFLUXDB_ORG')
 INFLUXDB_TOKEN = os.getenv('INFLUXDB_TOKEN')
 INFLUXDB_URL = os.getenv('INFLUXDB_URL')
+WEATHER_UNDERGROUND_BUCKET_NAME = os.getenv('WEATHER_UNDERGROUND_BUCKET_NAME')
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--radius", help="Urban area radius [km]", type=float, required=True)
@@ -27,7 +28,7 @@ radius, center_lat, center_lon, start_year, end_year = args.radius, args.lat, ar
 client = InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG)
 query_api = client.query_api()
 
-query = f'from(bucket:"WeatherUnderground")\
+query = f'from(bucket:"{WEATHER_UNDERGROUND_BUCKET_NAME}")\
     |> range(start: {start_year-1}-12-31T23:59:00Z, stop: {end_year}-12-31T23:59:59Z)\
     |> filter(fn: (r) => r["_field"] == "T_db[C]")\
     |> aggregateWindow(every: 1h, fn: mean, createEmpty: false)\
