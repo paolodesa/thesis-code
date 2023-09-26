@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import argparse
+import scipy
 from influxdb_client import InfluxDBClient
 import os
 from dotenv import load_dotenv
@@ -23,6 +24,15 @@ parser.add_argument("--end_year", help="End year", type=int, required=True)
 args = parser.parse_args()
 
 station_id, start_year, end_year = args.id.upper(), args.start_year, args.end_year
+
+def mode_std(x):
+    mode_array = scipy.stats.mode(x, keepdims=True)[0]
+    if len(mode_array) == 0:
+        return np.nan
+    elif np.isnan(mode_array):
+        return np.nan
+    else:
+        return mode_array[0]
 
 for source in [WEATHER_UNDERGROUND_BUCKET_NAME, OPEN_METEO_BUCKET_NAME]:
     query = f'from(bucket:"{source}")\
@@ -60,7 +70,18 @@ for source in [WEATHER_UNDERGROUND_BUCKET_NAME, OPEN_METEO_BUCKET_NAME]:
     df = df_filled.rename_axis('timestamp')
 
     df.drop(df.index[df.index.month.isin([2]) & df.index.day.isin([29])], inplace=True)
-    df.resample("1H").mean()
-    df = df.groupby('{:%m-%d %H}'.format).mean()
+
+    resample_dict = {
+        "v_air[m/s]": "mean",
+        "wind_dir[o]": lambda x: mode_std(x),
+        "T_db[C]": "mean",
+        "T_dp[C]": "mean",
+        "RH[%]": "mean",
+        "P_atm[hPa]": "mean",
+        "rain[mm]": "mean",
+        "GHI[W/m2]": "mean"
+    }
+    df = df.groupby('{:%m-%d %H}'.format).agg(resample_dict)
+    
     df.index = pd.to_datetime(df.index.map(lambda x: "1970-" + x + ":00:00"))
     df.to_csv(f"{station_id}_mean_TMY_{source}_{start_year}_{end_year}.csv", index=True)

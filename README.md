@@ -62,6 +62,32 @@ Addionally, users can find the `compare_tmy_generation_sources.py` and `compare_
 
 **NOTE**: these scripts read the TMY files, assuming that they are in the same directory where the scripts are executed and they have not been renamed
 
+In order to be able to generate TMY files for past year periods, for which data is not available from Weather Underground, users can find a different version of the `generate_iso_tmy.py` and `generate_mean_tmy.py` scripts inside the `open_meteo` subfolder. Instead of taking a station ID to reference a point on Earth, users will need to input its coordinates. The input parameters are:
+- `--lat`: the latitude (in decimal degrees) of the data source point
+- `--lon`: the longitude (in decimal degrees) of the data source point
+- `--start_year`: the start year of the weather data used to produce the TMY file
+- `--end_year`: the end year of the weather data used to produce the TMY file (included)
+- `--epw`: add this flag to output the TMY file also in EPW format
+
+in case the `--epw` flag is set, the script also accepts the following inputs:
+- `--city`: the city where the source point is located
+- `--country`: the country code (e.g. ITA) of the country where the source point is located
+- `--state`: the state/province/region where the source point is located (optional)
+- `--source`: a user-defined description of the data source (optional)
+- `--leap`: add this flag to mark the year of the EPW as a leap year
+- `--dst_start_date`: the start date (M/D format) of the daylight saving time (optional)
+- `--dst_end_date`: the end date (M/D format) of the daylight saving time (optional)
+- `--start_weekday`: the start day of the week (optional, default = Monday)
+- `--comment1`: first line of comments to be added to the EPW header (optional)
+- `--comment2`: second line of comments to be added to the EPW header (optional)
+
+**NOTE**: all TMY files have their timestamps referenced to the year 1970 as convention
+
+Finally, the script `compare_tmy_periods.py` in the `open_meteo` subfolder allows to plot the comparison of the daily mean dry-bulb air temperature for TMY files referencing different periods. It takes as input:
+- `--files`: space separated filenames of the TMY to be compared (in csv format)
+
+**NOTE**: the script assumes that the TMY filenames scructure has not been modified
+
 ### UHI effect analysis
 
 Inside the `uhi_effect` folder, users can find the `uhi_map.py` script, which will load a map showing a color-coded representation of the mean daily temperatures registered by all the weather stations. It requires the following inputs:

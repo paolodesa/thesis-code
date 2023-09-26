@@ -194,22 +194,32 @@ def get_location_data(city, state, country, source, wmo, lat, lon, tz):
     return f"LOCATION,{city},{state},{country},{source},{wmo},{lat},{lon},{tz},{elevation}"
 
 
-def get_ground_temps(lat, lon, start_date, end_date):
-    df = pd.read_csv(
-        f"https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={lon}&start_date={start_date}&end_date={end_date}&hourly=soil_temperature_0_to_7cm,soil_temperature_7_to_28cm,soil_temperature_28_to_100cm,soil_temperature_100_to_255cm&timezone=Europe%2FBerlin&format=csv", header=2)
-    df.index = pd.to_datetime(df['time'])
-    df.drop(columns=['time'], inplace=True)
-    df = df.resample("1M").mean()
-    soil_temps = "GROUND TEMPERATURES,4"
-    depths = ["0.04", "0.18", "0.64", "1.77"]
-    for idx, depth in enumerate(df):
-        soil_temps += f",{depths[idx]},,,"
-        for val in df[[depth]].values:
-            soil_temps += f",{round(val[0], 2)}"
-    return soil_temps
+def get_ground_temps(df, lat, lon, start_date, end_date, use_source=False):
+    if use_source:
+        df = df.resample("1M").mean()
+        soil_temps = "GROUND TEMPERATURES,4"
+        depths = ["0.04", "0.18", "0.64", "1.77"]
+        for idx, depth in enumerate(df[['soil_temperature_0_to_7cm (°C)', 'soil_temperature_7_to_28cm (°C)', 'soil_temperature_28_to_100cm (°C)', 'soil_temperature_100_to_255cm (°C)']]):
+            soil_temps += f",{depths[idx]},,,"
+            for val in df[[depth]].values:
+                soil_temps += f",{round(val[0], 2)}"
+        return soil_temps
+    else:
+        df = pd.read_csv(
+            f"https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={lon}&start_date={start_date}&end_date={end_date}&hourly=soil_temperature_0_to_7cm,soil_temperature_7_to_28cm,soil_temperature_28_to_100cm,soil_temperature_100_to_255cm&timezone=Europe%2FBerlin&format=csv", header=2)
+        df.index = pd.to_datetime(df['time'])
+        df.drop(columns=['time'], inplace=True)
+        df = df.resample("1M").mean()
+        soil_temps = "GROUND TEMPERATURES,4"
+        depths = ["0.04", "0.18", "0.64", "1.77"]
+        for idx, depth in enumerate(df):
+            soil_temps += f",{depths[idx]},,,"
+            for val in df[[depth]].values:
+                soil_temps += f",{round(val[0], 2)}"
+        return soil_temps
 
 
-def compile_header(df, city, country, lat, lon, state="", source="", leap=False, dst_start_date="0", dst_end_date="0", start_weekday="Monday", comment1="", comment2=""):
+def compile_header(df, city, country, lat, lon, state="", source="", leap=False, dst_start_date="0", dst_end_date="0", start_weekday="Monday", comment1="", comment2="", use_source_for_ground=False):
     start_date = df.index[0].strftime("%Y-%m-%d")
     end_date = df.index[-1].strftime("%Y-%m-%d")
 
@@ -218,7 +228,7 @@ def compile_header(df, city, country, lat, lon, state="", source="", leap=False,
     te_periods = get_te_periods(df, dt.fromisoformat(start_date).year)
     location_data = get_location_data(
         city, state, country, source, wmo, lat, lon, tz)
-    ground_temps = get_ground_temps(lat, lon, start_date, end_date)
+    ground_temps = get_ground_temps(df, lat, lon, start_date, end_date, use_source=use_source_for_ground)
 
     isLeap = "Yes" if leap else "No"
     holidays_dst_data = f"HOLIDAYS/DAYLIGHT SAVINGS,{isLeap},{dst_start_date},{dst_end_date},0"

@@ -76,7 +76,8 @@ def convert_dates(date):
 def convert_to_epw(
         df,
         header,
-        station_id
+        station_id=None,
+        epw_filename=None
     ):
     """Load a CSV file and generate a correspondent EPW file.
 
@@ -159,18 +160,32 @@ def convert_to_epw(
 
     epw = fix_dates(epw)
 
-    # Save EPW
-    epw.save(f'{station_id}.epw')
-    # Replace header
-    with open(f'{station_id}.epw', "r+") as f:
-        data = f.readlines()
-        data = data[8:]
-        data.insert(0, f"{header}\n")
-        f.seek(0)
-        for d in data:
-            f.write(d)
-        f.close()
-    print("SAVING TO:", f'{station_id}.epw')
+    if station_id is not None:
+        # Save EPW
+        epw.save(f'{station_id}.epw')
+        # Replace header
+        with open(f'{station_id}.epw', "r+") as f:
+            data = f.readlines()
+            data = data[8:]
+            data.insert(0, f"{header}\n")
+            f.seek(0)
+            for d in data:
+                f.write(d)
+            f.close()
+        print("SAVING TO:", f'{station_id}.epw')
+    else:
+        # Save EPW
+        epw.save(f'{epw_filename}.epw')
+        # Replace header
+        with open(f'{epw_filename}.epw', "r+") as f:
+            data = f.readlines()
+            data = data[8:]
+            data.insert(0, f"{header}\n")
+            f.seek(0)
+            for d in data:
+                f.write(d)
+            f.close()
+        print("SAVING TO:", f'{epw_filename}.epw')
 
 
 def parse_args():
