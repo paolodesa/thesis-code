@@ -1,6 +1,7 @@
 import argparse
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 plt.rcParams['legend.fontsize'] = 14
 plt.rcParams['axes.labelsize'] = 14
 plt.rcParams['axes.titlesize'] = 18
@@ -29,11 +30,12 @@ mt = mt.interpolate(method='linear')
 t = t.resample('D').mean()
 t = t.interpolate(method='linear')
 
-fig = plt.figure(figsize=(16, 9))
+fig, ax = plt.subplots(figsize=(16, 9))
 plt.plot(mt.index, mt['T_db[C]'], label='Mean over all years')
 plt.plot(t.index, t['T_db[C]'], label='Conventional TMY')
 plt.xlabel('Timestamp')
 plt.ylabel('Mean daily temperature [°C]')
 plt.title(f'Comparison between avergaing over all years ({start_year}-{end_year}) of data and conventional TMY construction')
 plt.legend()
+ax.xaxis.set_major_formatter(mdates.DateFormatter('%b, %d'))
 plt.show()
